@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="dark" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Activity Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-black': '#111111',
+                        'dark-gray': '#1E1E1E',
+                        'accent-green': '#4ADE80'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-deep-black text-white dark:bg-deep-black dark:text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-dark-gray rounded-xl shadow-2xl p-6">
+            <h1 class="text-3xl font-bold text-center mb-4 text-accent-green">
+                Advanced Activity Tracker
+            </h1>
+            <p class="text-center text-gray-300 mb-6">
+                Monitoring browser activity, extensions, and potential exam interference
+            </p>
+
+            <div class="bg-deep-black border-2 border-gray-800 rounded-lg p-4">
+                <div class="flex items-center mb-4">
+                    <span class="mr-2 text-accent-green">📋</span>
+                    <strong class="text-xl text-accent-green">Activity Log</strong>
+                </div>
+                
+                <div 
+                    id="log" 
+                    class="h-[300px] overflow-y-auto text-gray-300 font-mono text-sm bg-[#0A0A0A] p-3 rounded"
+                >
+                    <!-- Log entries will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // [Rest of your previous JavaScript remains the same]
+        const log = document.getElementById('log');
+
+        function logEvent(message) {
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `
+                <p class="border-b border-gray-800 py-1">
+                    <span class="text-accent-green">[${time}]</span> 
+                    ${message}
+                </p>
+            `;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Comprehensive Browser and System Tracking
+        class ExamMonitor {
+            constructor() {
+                this.initializeTracking();
+            }
+
+            initializeTracking() {
+                this.trackVisibilityChanges();
+                this.trackMouseActivity();
+                this.trackKeyboardActivity();
+                this.trackBrowserFocus();
+                this.detectScreenChanges();
+                this.checkBrowserExtensions();
+                this.detectCopyPaste();
+                this.preventDevTools();
+                this.trackClipboard();
+            }
+
+            trackVisibilityChanges() {
+                document.addEventListener('visibilitychange', () => {
+                    logEvent(document.hidden 
+                        ? 'Tab became inactive (potential cheating attempt)' 
+                        : 'Tab returned to active state');
+                });
+            }
+
+            trackMouseActivity() {
+                let lastMouseX = 0, lastMouseY = 0;
+                document.addEventListener('mousemove', (event) => {
+                    const { clientX, clientY } = event;
+                    if (Math.abs(clientX - lastMouseX) > 50 || Math.abs(clientY - lastMouseY) > 50) {
+                        logEvent('Significant mouse movement detected');
+                    }
+                    lastMouseX = clientX;
+                    lastMouseY = clientY;
+                });
+            }
+
+            trackKeyboardActivity() {
+                document.addEventListener('keydown', (event) => {
+                    // Log potentially suspicious key combinations
+                    if (event.ctrlKey || event.altKey) {
+                        logEvent(`Potential shortcut attempt: ${event.key}`);
+                    }
+                });
+            }
+
+            trackBrowserFocus() {
+                window.addEventListener('blur', () => {
+                    logEvent('Browser lost focus - potential tab switching');
+                });
+                window.addEventListener('focus', () => {
+                    logEvent('Browser regained focus');
+                });
+            }
+
+            detectScreenChanges() {
+                window.addEventListener('resize', () => {
+                    logEvent('Screen resolution or layout changed');
+                });
+            }
+
+            checkBrowserExtensions() {
+            if (window.chrome && chrome.runtime && chrome.runtime.id) {
+                // Detect Chrome extensions
+                chrome.management.getAll((extensions) => {
+                    const suspiciousExtensions = extensions.filter(ext => 
+                        ext.name.toLowerCase().includes('screenshot') || 
+                        ext.name.toLowerCase().includes('record') ||
+                        ext.name.toLowerCase().includes('capture')
+                    );
+                    
+                    if (suspiciousExtensions.length > 0) {
+                        logEvent('Potentially suspicious extensions detected:');
+                        suspiciousExtensions.forEach(ext => {
+                            logEvent(`- ${ext.name}`);
+                        });
+                    }
+                });
+            }
+        }
+
+            detectCopyPaste() {
+                document.addEventListener('copy', (e) => {
+                    logEvent('Copy attempt detected');
+                    e.preventDefault(); // Optional: prevent copying
+                });
+
+                document.addEventListener('paste', (e) => {
+                    logEvent('Paste attempt detected');
+                    e.preventDefault(); // Optional: prevent pasting
+                });
+            }
+
+            preventDevTools() {
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    logEvent('Right-click attempt blocked');
+                });
+
+                // Detect DevTools opening
+                const devToolsCheck = () => {
+                    const threshold = 160;
+                    const widthDiff = window.outerWidth - window.innerWidth;
+                    const heightDiff = window.outerHeight - window.innerHeight;
+
+                    if (widthDiff > threshold || heightDiff > threshold) {
+                        logEvent('DevTools potentially opened');
+                    }
+                };
+
+                setInterval(devToolsCheck, 1000);
+            }
+
+            trackClipboard() {
+                navigator.clipboard.readText().then(
+                    clipText => {
+                        if (clipText) {
+                            logEvent('Clipboard content detected');
+                        }
+                    }
+                ).catch(err => {
+                    console.error('Clipboard read failed', err);
+                });
+            }
+        }
+
+        // Initialize the exam monitoring
+        new ExamMonitor();
+    </script>
+</body>
+</html>
